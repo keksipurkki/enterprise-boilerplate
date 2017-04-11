@@ -1,6 +1,7 @@
 package com.enterprise.boilerplate.app;
 
 import com.enterprise.boilerplate.config.Config;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.ComponentScan;

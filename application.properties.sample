@@ -1,0 +1,3 @@
+com.enterprise.db.url = jdbc:mysql://192.168.99.100:3308/db
+com.enterprise.db.username = root
+com.enterprise.db.password = docker
