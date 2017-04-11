@@ -1,0 +1,52 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+
+group 'com.enterprise'
+version 'development'
+mainClassName ='com.enterprise.boilerplate.app.App'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compileOnly "org.projectlombok:lombok:1.16.16"
+
+    compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    compile "mysql:mysql-connector-java"
+
+    compile "com.fasterxml.jackson.core:jackson-annotations"
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+    compile 'javax.validation:validation-api'
+    testCompile "junit:junit"
+}
+
+jar {
+
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task copyJar(type: Copy) {
+    from jar // here it automatically reads jar file produced from jar task
+    into '.'
+}
+
+build.dependsOn copyJar
