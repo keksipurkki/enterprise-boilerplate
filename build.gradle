@@ -29,7 +29,7 @@ dependencies {
 
     compile "com.fasterxml.jackson.core:jackson-annotations"
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
-    compile 'javax.validation:validation-api'
+    compile 'javax.validation::validation-api'
     testCompile "junit:junit"
 }
 
