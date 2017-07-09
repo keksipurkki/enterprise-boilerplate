@@ -1,3 +1,12 @@
 com.enterprise.db.url = jdbc:mysql://192.168.99.100:3308/db
 com.enterprise.db.username = root
 com.enterprise.db.password = docker
+
+# Logging
+logging.level.com.enterprise.boilerplate=INFO
+logging.level.org.hibernate=ERROR
+logging.level.org.springframework=WARN
+logging.pattern.console=%date{ISO8601} %highlight(%-5level) %message [%C{0}:%L]%n
+
+# Tweaks
+spring.main.banner-mode=off

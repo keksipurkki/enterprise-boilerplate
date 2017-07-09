@@ -3,6 +3,7 @@ package com.enterprise.boilerplate.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -18,25 +19,39 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Properties;
 
-@Configuration
-@EnableTransactionManagement
-public class PersistenceConfig {
+/**
+ *
+ * For configuring the persistence layer
+ *
+ */
 
-    private final String DOMAIN_MODEL = "com.enterprise.boilerplate.model";
+
+@Configuration
+@EnableTransactionManagement // @Transactional
+// @EntityScan("com.enterprise.boilerplate.model") // if auto-configuration was used
+class PersistenceConfig {
+
     private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     private final String HIBERNATE_DIALECT = "org.hibernate.dialect.MySQL5InnoDBDialect";
 
-    @Autowired
     private Environment env;
 
+    @Autowired
+    public PersistenceConfig(Environment env) {
+        this.env = env;
+        assert this.env != null;
+
+    }
+
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[]{ DOMAIN_MODEL });
+        em.setDataSource(dataSource);
+        em.setPackagesToScan("com.enterprise.boilerplate.model");
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
@@ -47,11 +62,29 @@ public class PersistenceConfig {
 
     @Bean
     public DataSource dataSource() {
+
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(JDBC_DRIVER);
-        dataSource.setUrl(env.getProperty("com.enterprise.db.url"));
-        dataSource.setUsername(env.getProperty("com.enterprise.db.username"));
-        dataSource.setPassword(env.getProperty("com.enterprise.db.password"));
+
+        try {
+
+            dataSource.setUrl(env.getProperty("com.enterprise.db.url"));
+            dataSource.setUsername(env.getProperty("com.enterprise.db.username"));
+            dataSource.setPassword(env.getProperty("com.enterprise.db.password"));
+            dataSource.getConnection();
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException("Cannot connect to the database you specified. Check your application properties.");
+
+
+        } catch (java.lang.IllegalArgumentException e) {
+
+            throw new RuntimeException("Cannot read database connection parameters from application properties");
+
+
+        }
+
         return dataSource;
     }
 
@@ -67,7 +100,7 @@ public class PersistenceConfig {
         return new PersistenceExceptionTranslationPostProcessor();
     }
 
-    Properties additionalProperties() {
+    private Properties additionalProperties() {
         Properties properties = new Properties();
         properties.setProperty("hibernate.namingStrategy", "jpa");
         properties.setProperty("hibernate.show_sql", "false");
